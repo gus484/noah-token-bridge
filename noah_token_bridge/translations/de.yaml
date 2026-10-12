@@ -1,0 +1,46 @@
+configuration:
+  token:
+    name: API-Token
+    description: Growatt-API-Token (ShinePhone-App → Ich → Benutzername → API Token). Nicht dein Passwort.
+  device_sn:
+    name: Seriennummer des Noah
+    description: Seriennummer des Noah 2000 (Typenschild oder App). Die Geräteliste der API ist oft leer, deshalb wird sie hier angegeben.
+  server_url:
+    name: Growatt-Server
+    description: Server deines Kontos, z. B. https://openapi.growatt.com (Europa/Standard), https://openapi-us.growatt.com (Amerika).
+  entity_prefix:
+    name: Präfix der Entity-IDs
+    description: Beginn der entity_ids in Home Assistant, z. B. noah_2000 ergibt sensor.noah_2000_soc.
+  capacity_per_pack_kwh:
+    name: Kapazität je Akkupack (kWh)
+    description: Nutzbare Kapazität eines Akkupacks, für gespeicherte Energie und Restlaufzeit.
+  energy_interval:
+    name: Intervall Live-Werte (s)
+    description: Sekunden zwischen Live-Abrufen. Growatt erlaubt höchstens einen Abruf je 5 Minuten (mindestens 300).
+  details_interval:
+    name: Intervall Einstellungen (s)
+    description: Sekunden zwischen Abrufen der Geräteeinstellungen (mindestens 300).
+  slow_interval:
+    name: Intervall WLAN/Firmware (s)
+    description: Sekunden zwischen Abrufen von WLAN-Signal und Firmware (mindestens 60).
+  max_requests_per_hour:
+    name: Maximale Requests pro Stunde
+    description: Harte Obergrenze für alle Anfragen an Growatt, unabhängig von den Intervallen.
+  log_level:
+    name: Log-Level
+    description: Ausführlichkeit des Logs.
+  state_file:
+    name: Zählerdatei (optional)
+    description: Pfad der Zählerstände. Leer lassen (Standard /data/noah_state.json).
+  mqtt_host:
+    name: MQTT-Host (optional)
+    description: Nur setzen, wenn nicht der MQTT-Dienst des Supervisors (Mosquitto-Add-on) genutzt wird.
+  mqtt_port:
+    name: MQTT-Port (optional)
+    description: Nur zusammen mit dem MQTT-Host.
+  mqtt_user:
+    name: MQTT-Benutzer (optional)
+    description: Nur zusammen mit dem MQTT-Host.
+  mqtt_password:
+    name: MQTT-Passwort (optional)
+    description: Nur zusammen mit dem MQTT-Host.

@@ -45,8 +45,8 @@ class GuardedRequests:
         return self._inner(method, url, **kwargs)
 
 
-def build_api(token: str, limiter: HourlyLimiter) -> GrowattApi:
-    api = GrowattApi(token=token, use_cache=False)
+def build_api(token: str, limiter: HourlyLimiter, server_url: str = "") -> GrowattApi:
+    api = GrowattApi(token=token, server_url=server_url or None, use_cache=False)
     http = api.session.session
     http.request = GuardedRequests(http.request, limiter)
     return api

@@ -18,8 +18,7 @@ pip install -r requirements-dev.txt
 python -m pytest -q                      # all tests
 python -m pytest tests/test_poller.py::test_failure_backs_off_exponentially_never_immediately
 python test_token.py                     # one-shot API probe, writes redacted samples/*.json (needs GROWATT_TOKEN, optional GROWATT_SN)
-python -m noah_bridge                    # run the bridge (needs GROWATT_TOKEN, GROWATT_DEVICE_SN, MQTT_HOST)
-python scripts/package_addon.py          # builds dist/noah_token_bridge/ for /addons/
+cd noah_token_bridge; python -m noah_bridge            # run the bridge (needs GROWATT_TOKEN, GROWATT_DEVICE_SN, MQTT_HOST)
 docker compose -f docker/compose.yaml up -d   # test Mosquitto :1883 + Home Assistant :8123 (localhost only)
 ```
 
@@ -43,7 +42,8 @@ Energy counters: `energy.EnergyCounters` trapezoid-integrates PV power and batte
 
 Entities: `entities.STATIC` plus `pack_entities(n)` (announced once the pack count is known). Every entity's `key` must exist in the state dict published to its topic; `tests/test_app.py` checks this. Discovery is per entity and retained, and is re-sent when HA publishes `homeassistant/status online`. Battery power sign: positive = charging, negative = discharging (seen: -362 W discharging, +56 W charging at 59 W PV). Charging only starts at roughly 55-60 W PV; below that `battery_power` stays 0 although PV is non-zero. Single `pack2_soc` readings of 0.0 occur as API glitches.
 
-Add-on: `addon/` (config.yaml, Dockerfile on `python:3.13-alpine`, no s6/bashio, `init: false`) is combined with `noah_bridge/` and `requirements.txt` by `scripts/package_addon.py`; `dist/` is gitignored. Only aarch64 and amd64 (no armv7 wheels for pydantic-core).
+
+Add-on repo layout: `repository.yaml` at the root, add-on folder `noah_token_bridge/` (config.yaml, Dockerfile on `python:3.13-alpine`, no s6/bashio, `init: false`, `translations/{de,en}.yaml`, DOCS.md, CHANGELOG.md) containing the package `noah_bridge/` and `requirements.txt`, so Home Assistant can build it straight from the git repo. Tests find the package via `pytest.ini` (`pythonpath = noah_token_bridge`). Option `server_url` selects the Growatt regional server. The repo URL is github.com/gus484/noah-token-bridge. Only aarch64 and amd64 (no armv7 wheels for pydantic-core). When adding an option, update `Config`, config.yaml (options + schema), both translation files and DOCS.md.
 
 ## Gotchas
 

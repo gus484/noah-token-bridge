@@ -41,3 +41,10 @@ def test_repr_hides_secrets(tmp_path):
     env = {"GROWATT_TOKEN": "geheim", "GROWATT_DEVICE_SN": "snsn", "MQTT_PASSWORD": "pw"}
     text = repr(load_config(env, tmp_path / "x.json"))
     assert "geheim" not in text and "snsn" not in text and "pw'" not in text
+
+
+def test_server_url_validation(tmp_path):
+    env = {"GROWATT_TOKEN": "t", "GROWATT_DEVICE_SN": "s", "GROWATT_SERVER_URL": "https://openapi-us.growatt.com"}
+    assert load_config(env, tmp_path / "x.json").server_url == "https://openapi-us.growatt.com"
+    with pytest.raises(ConfigError):
+        load_config({**env, "GROWATT_SERVER_URL": "openapi.growatt.com"}, tmp_path / "x.json")

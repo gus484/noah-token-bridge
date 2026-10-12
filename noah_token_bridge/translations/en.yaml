@@ -1,0 +1,46 @@
+configuration:
+  token:
+    name: API token
+    description: Growatt API token (ShinePhone app → Me → user name → API Token). Not your password.
+  device_sn:
+    name: Noah serial number
+    description: Serial number of the Noah 2000 (name plate or app). The API device list is often empty, so it is entered here.
+  server_url:
+    name: Growatt server
+    description: Server of your account, e.g. https://openapi.growatt.com (Europe/default), https://openapi-us.growatt.com (Americas).
+  entity_prefix:
+    name: Entity ID prefix
+    description: Start of the entity_ids in Home Assistant, e.g. noah_2000 gives sensor.noah_2000_soc.
+  capacity_per_pack_kwh:
+    name: Capacity per battery pack (kWh)
+    description: Usable capacity of one battery pack, used for stored energy and remaining runtime.
+  energy_interval:
+    name: Live data interval (s)
+    description: Seconds between live polls. Growatt allows at most one call per 5 minutes (minimum 300).
+  details_interval:
+    name: Settings interval (s)
+    description: Seconds between polls of the device settings (minimum 300).
+  slow_interval:
+    name: WiFi/firmware interval (s)
+    description: Seconds between polls of WiFi signal and firmware (minimum 60).
+  max_requests_per_hour:
+    name: Maximum requests per hour
+    description: Hard cap for all requests to Growatt, independent of the intervals.
+  log_level:
+    name: Log level
+    description: Verbosity of the log.
+  state_file:
+    name: Counter file (optional)
+    description: Path of the counter state. Leave empty (default /data/noah_state.json).
+  mqtt_host:
+    name: MQTT host (optional)
+    description: Only set if you do not use the Supervisor MQTT service (Mosquitto add-on).
+  mqtt_port:
+    name: MQTT port (optional)
+    description: Only together with the MQTT host.
+  mqtt_user:
+    name: MQTT user (optional)
+    description: Only together with the MQTT host.
+  mqtt_password:
+    name: MQTT password (optional)
+    description: Only together with the MQTT host.

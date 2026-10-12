@@ -31,7 +31,7 @@ def main() -> int:
     setup_logging(cfg.log_level, [cfg.token, cfg.device_sn, cfg.mqtt_password])
 
     limiter = HourlyLimiter(cfg.max_requests_per_hour)
-    client = NoahClient(build_api(cfg.token, limiter), cfg.device_sn)
+    client = NoahClient(build_api(cfg.token, limiter, cfg.server_url), cfg.device_sn)
     publisher = MqttPublisher(cfg, client_id=f"noah-bridge-{uuid.uuid4().hex[:6]}")
     state_file = cfg.state_file or ("/data/noah_state.json" if os.path.isdir("/data") else "noah_state.json")
     counters = EnergyCounters(Path(state_file), max_gap_s=cfg.energy_interval * 2.5)

@@ -21,6 +21,7 @@ class ConfigError(ValueError):
 class Config:
     token: str = field(repr=False)
     device_sn: str = field(repr=False)
+    server_url: str = ""  # leer = https://openapi.growatt.com (Region/Server des Kontos)
     mqtt_host: str = ""  # leer = Supervisor-Dienst (Add-on) oder localhost
     mqtt_port: int = 1883
     mqtt_user: str = ""
@@ -46,6 +47,8 @@ class Config:
             raise ConfigError("token fehlt (GROWATT_TOKEN)")
         if not self.device_sn:
             raise ConfigError("device_sn fehlt (GROWATT_DEVICE_SN)")
+        if self.server_url and not self.server_url.startswith(("https://", "http://")):
+            raise ConfigError("server_url muss mit https:// beginnen")
         # energy_v4 und details_v4 sind laut Growatt auf einen Abruf je 5 Minuten begrenzt
         for name, minimum in (("energy_interval", 300), ("details_interval", 300), ("slow_interval", 60)):
             if getattr(self, name) < minimum:
