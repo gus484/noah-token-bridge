@@ -1,0 +1,31 @@
+# Lokale Testumgebung: Mosquitto + Home Assistant.
+#   docker compose -f docker/compose.yaml up -d
+# Home Assistant: http://localhost:8123 (Onboarding, dann MQTT-Integration mit Broker "mosquitto", Port 1883)
+# Die Bridge laeuft waehrend der Entwicklung auf dem Host mit MQTT_HOST=localhost.
+name: noah-test
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0.20
+    ports:
+      - "127.0.0.1:1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+    restart: unless-stopped
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:2025.1.4
+    ports:
+      - "127.0.0.1:8123:8123"
+    volumes:
+      - ha-config:/config
+    environment:
+      TZ: Europe/Berlin
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+volumes:
+  mosquitto-data:
+  ha-config:

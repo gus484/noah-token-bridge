@@ -1,0 +1,2 @@
+growatt-public-api==2026.5.19
+paho-mqtt==2.1.0

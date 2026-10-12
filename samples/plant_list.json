@@ -1,0 +1,29 @@
+{
+  "data": {
+    "count": 1,
+    "plants": [
+      {
+        "city": "REDACTED",
+        "country": "Germany",
+        "create_date": "2026-05-03",
+        "current_power": 350.0,
+        "image_url": null,
+        "installer": "0",
+        "latitude": "REDACTED",
+        "latitude_d": null,
+        "latitude_f": null,
+        "locale": "en-US",
+        "longitude": "REDACTED",
+        "name": "REDACTED",
+        "operator": "0",
+        "peak_power": 0.800000011920929,
+        "plant_id": "REDACTED",
+        "status": 1,
+        "total_energy": 0.0,
+        "user_id": "REDACTED"
+      }
+    ]
+  },
+  "error_code": 0,
+  "error_msg": null
+}

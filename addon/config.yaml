@@ -1,0 +1,38 @@
+name: Noah Token Bridge
+version: "0.1.0"
+slug: noah_token_bridge
+description: Growatt Noah 2000 über die offizielle Growatt-API (Token) per MQTT in Home Assistant
+url: https://github.com/
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: application
+boot: auto
+services:
+  - mqtt:need
+options:
+  token: ""
+  device_sn: ""
+  entity_prefix: noah_2000
+  capacity_per_pack_kwh: 2.048
+  energy_interval: 300
+  details_interval: 900
+  slow_interval: 3600
+  max_requests_per_hour: 60
+  log_level: INFO
+schema:
+  token: password
+  device_sn: str
+  entity_prefix: str
+  capacity_per_pack_kwh: float(0.1,)
+  energy_interval: int(300,)
+  details_interval: int(300,)
+  slow_interval: int(60,)
+  max_requests_per_hour: int(1,)
+  log_level: list(DEBUG|INFO|WARNING|ERROR)
+  state_file: str?
+  mqtt_host: str?
+  mqtt_port: port?
+  mqtt_user: str?
+  mqtt_password: password?

@@ -1,0 +1,15 @@
+{
+  "data": {
+    "device_sn": "REDACTED",
+    "device_type": "noah",
+    "device_model": "NOAH 2000",
+    "datalogger_model": "NOAH 2000",
+    "battery_model": null,
+    "nominal_power": 800,
+    "battery_capacity": "REDACTED",
+    "battery_nominal_power": 0.0,
+    "has_battery": false
+  },
+  "error_code": 0,
+  "error_msg": "SUCCESSFUL_OPERATION"
+}
