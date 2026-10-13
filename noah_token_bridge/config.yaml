@@ -1,5 +1,5 @@
 name: Noah Token Bridge
-version: "0.1.0"
+version: "0.1.1"
 slug: noah_token_bridge
 description: Growatt Noah 2000 via the official Growatt API (token) to Home Assistant over MQTT
 url: https://github.com/gus484/noah-token-bridge
