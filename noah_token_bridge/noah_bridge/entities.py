@@ -45,7 +45,10 @@ STATIC: tuple[Entity, ...] = (
     S("system_temperature", "Systemtemperatur", ENERGY, unit="°C", device_class="temperature", state_class="measurement", category="diagnostic"),
     S("status", "Status", ENERGY, category="diagnostic", icon="mdi:information-outline"),
     S("work_mode", "Betriebsmodus", ENERGY, category="diagnostic", icon="mdi:cog-outline"),
-    S("charging_status", "Ladestatus (roh)", ENERGY, category="diagnostic", icon="mdi:battery-charging-outline"),
+    S("charging_status", "Ladestatus", ENERGY, category="diagnostic", icon="mdi:battery-charging-outline"),
+    S("problem", "Störung", ENERGY, platform="binary_sensor", device_class="problem", category="diagnostic"),
+    S("heating", "Akku-Heizung", ENERGY, platform="binary_sensor", device_class="heat", category="diagnostic"),
+    S("grid_mode", "Netzbetrieb", ENERGY, category="diagnostic", icon="mdi:transmission-tower"),
     S("pv1_voltage", "PV1 Spannung", ENERGY, unit="V", device_class="voltage", state_class="measurement", category="diagnostic"),
     S("pv1_current", "PV1 Strom", ENERGY, unit="A", device_class="current", state_class="measurement", category="diagnostic"),
     S("pv2_voltage", "PV2 Spannung", ENERGY, unit="V", device_class="voltage", state_class="measurement", category="diagnostic"),
@@ -65,6 +68,7 @@ STATIC: tuple[Entity, ...] = (
     S("last_update", "Letzte Aktualisierung", ENERGY, device_class="timestamp", category="diagnostic"),
     S("soc_upper_limit", "SOC-Obergrenze", DETAILS, unit="%", category="diagnostic", icon="mdi:battery-arrow-up"),
     S("soc_lower_limit", "SOC-Untergrenze", DETAILS, unit="%", category="diagnostic", icon="mdi:battery-arrow-down"),
+    S("default_power", "Standard-Ausgangsleistung", DETAILS, unit="W", device_class="power", category="diagnostic"),
     S("allow_grid_charging", "Netzladen erlaubt", DETAILS, platform="binary_sensor", category="diagnostic"),
     S("bms_version", "BMS-Version", DETAILS, category="diagnostic"),
     S("mppt_version", "MPPT-Version", DETAILS, category="diagnostic"),
@@ -81,6 +85,30 @@ def pack_entities(count: int) -> tuple[Entity, ...]:
         out.append(S(f"pack{i}_soc", f"Pack {i} Ladestand", ENERGY, unit="%", device_class="battery", state_class="measurement"))
         out.append(S(f"pack{i}_temperature", f"Pack {i} Temperatur", ENERGY, unit="°C", device_class="temperature", state_class="measurement"))
     return tuple(out)
+
+
+STATUS_TEXT = {1: "Normal", 4: "Störung", 5: "Heizen"}
+
+
+def _status_text(v: int | None) -> str | None:
+    return None if v is None else STATUS_TEXT.get(v, f"Unbekannt ({v})")
+
+
+def _charging_text(v: int | None) -> str | None:
+    """Bit0 = Laden, Bit1 = Entladen, sonst Standby (Growatt-Doku)."""
+    if v is None:
+        return None
+    return "Laden" if v & 1 else "Entladen" if v & 2 else "Standby"
+
+
+def _problem(s: EnergySnapshot) -> bool | None:
+    bits = [s.fault_status, s.pd_warn_status, s.mppt_protect_status]
+    for p in s.packs:
+        bits += [p.warn_status, p.protect_status]
+    known = [b for b in bits if b is not None]
+    if s.status is None and not known:
+        return None
+    return s.status == 4 or any(known)
 
 
 def device_id(device_sn: str) -> str:
@@ -129,8 +157,11 @@ def energy_state(s: EnergySnapshot) -> dict[str, Any]:
         "battery_power": s.battery_power, "energy_today": s.energy_today,
         "energy_month": s.energy_month, "energy_year": s.energy_year,
         "energy_total": s.energy_total, "cycles": s.cycles, "health": s.health,
-        "system_temperature": s.system_temperature, "status": s.status,
-        "work_mode": s.work_mode, "charging_status": s.charging_status,
+        "system_temperature": s.system_temperature, "status": _status_text(s.status),
+        "work_mode": s.work_mode, "charging_status": _charging_text(s.charging_status),
+        "problem": _problem(s),
+        "heating": None if s.heating_status is None else s.heating_status != 0,
+        "grid_mode": None if s.on_off_grid is None else ("Offgrid" if s.on_off_grid else "Ongrid"),
         "pv1_voltage": s.pv1_voltage, "pv1_current": s.pv1_current,
         "pv2_voltage": s.pv2_voltage, "pv2_current": s.pv2_current,
     }
@@ -143,6 +174,6 @@ def energy_state(s: EnergySnapshot) -> dict[str, Any]:
 def details_state(s: DetailsSnapshot) -> dict[str, Any]:
     return {
         "soc_upper_limit": s.soc_upper_limit, "soc_lower_limit": s.soc_lower_limit,
-        "allow_grid_charging": s.allow_grid_charging, "bms_version": s.bms_version,
+        "default_power": s.default_power, "allow_grid_charging": s.allow_grid_charging, "bms_version": s.bms_version,
         "mppt_version": s.mppt_version, "pd_version": s.pd_version,
     }

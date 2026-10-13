@@ -43,6 +43,8 @@ class Pack:
     index: int
     soc: float | None
     temperature: float | None
+    warn_status: int | None = None  # Bitfeld laut Growatt-Doku
+    protect_status: int | None = None
 
 
 @dataclass(frozen=True)
@@ -62,12 +64,17 @@ class EnergySnapshot:
     system_temperature: float | None
     status: int | None
     work_mode: int | None
-    # Rohwerte zur Diagnose der Akkuleistung (Vorzeichen/Ladeerkennung noch ungeklaert)
+    # Bitfeld: Bit0 = Laden, Bit1 = Entladen, sonst Standby
     charging_status: int | None = None
     pv1_voltage: float | None = None
     pv1_current: float | None = None
     pv2_voltage: float | None = None
     pv2_current: float | None = None
+    heating_status: int | None = None  # Bitfeld, Bit n = Pack n+1 heizt
+    fault_status: int | None = None  # Bitfeld, Bit n = Pack n+1 gestoert
+    pd_warn_status: int | None = None  # Bit0 BMS-, Bit1 MPPT-Kommunikation ausgefallen
+    mppt_protect_status: int | None = None
+    on_off_grid: int | None = None
     packs: tuple[Pack, ...] = field(default_factory=tuple)
 
     @classmethod
@@ -75,7 +82,8 @@ class EnergySnapshot:
         d = first_device(response)
         count = _int(d, "battery_package_quantity") or 0
         packs = tuple(
-            Pack(i, _num(d, f"battery{i}_soc"), _num(d, f"battery{i}_temp"))
+            Pack(i, _num(d, f"battery{i}_soc"), _num(d, f"battery{i}_temp"),
+                 _int(d, f"battery{i}_warn_status"), _int(d, f"battery{i}_protect_status"))
             for i in range(1, min(count, MAX_PACKS) + 1)
         )
         return cls(
@@ -97,6 +105,11 @@ class EnergySnapshot:
             pv1_current=_num(d, "pv1_current"),
             pv2_voltage=_num(d, "pv2_voltage"),
             pv2_current=_num(d, "pv2_current"),
+            heating_status=_int(d, "heating_status"),
+            fault_status=_int(d, "fault_status"),
+            pd_warn_status=_int(d, "pd_warn_status"),
+            mppt_protect_status=_int(d, "mppt_protect_status"),
+            on_off_grid=_int(d, "on_off_grid"),
             packs=packs,
         )
 
@@ -108,6 +121,7 @@ class DetailsSnapshot:
     model: str | None
     soc_upper_limit: float | None
     soc_lower_limit: float | None
+    default_power: float | None
     allow_grid_charging: bool | None
     lost: bool | None
     bms_version: str | None
@@ -123,6 +137,7 @@ class DetailsSnapshot:
             model=d.get("model_name") or d.get("model"),
             soc_upper_limit=_num(d, "charging_soc_high_limit"),
             soc_lower_limit=_num(d, "charging_soc_low_limit"),
+            default_power=_num(d, "default_power"),
             allow_grid_charging=None if grid is None else bool(grid),
             lost=lost if isinstance(lost, bool) else None,
             bms_version=d.get("bms_version"),

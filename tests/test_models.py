@@ -67,3 +67,21 @@ def test_null_data_is_parse_error():
 def test_error_code_is_parse_error():
     with pytest.raises(ParseError):
         EnergySnapshot.from_response({"error_code": 10012, "error_msg": "RATE_LIMIT", "data": None})
+
+
+def test_energy_diagnostic_fields_match_raw():
+    raw = raw_device("noah_energy_v4")
+    s = EnergySnapshot.from_response(load("noah_energy_v4"))
+    assert s.heating_status == raw["heating_status"]
+    assert s.fault_status == raw["fault_status"]
+    assert s.pd_warn_status == raw["pd_warn_status"]
+    assert s.mppt_protect_status == raw["mppt_protect_status"]
+    assert s.on_off_grid == raw["on_off_grid"]
+    assert [(p.warn_status, p.protect_status) for p in s.packs] == [
+        (raw[f"battery{i}_warn_status"], raw[f"battery{i}_protect_status"]) for i in (1, 2)
+    ]
+
+
+def test_details_default_power():
+    raw = raw_device("noah_details_v4")
+    assert DetailsSnapshot.from_response(load("noah_details_v4")).default_power == raw["default_power"]
